@@ -6,6 +6,13 @@ Directions = {
 }
 
 
+'''
+- Na piechotę: 10 jednostek czasu, koszt darmowy
+- Autobusy: 3 jednostki czasu, kosztuje 2 euro
+- Statek 5 jednostek czasu, kosztuje 5 euro
+- Pociąg: 1 jednostka czasu, kosztuje 3 euro
+'''
+
 class Tile(object):
     def __int__(self):
         pass
@@ -13,16 +20,45 @@ class Tile(object):
     Walk, Bus, Train, Ship = range(4)
 
 
+MoneyCost = {
+    Tile.Walk : 0,
+    Tile.Bus : 2,
+    Tile.Ship : 5,
+    Tile.Train : 3
+}
+
+TimeCost = {
+    Tile.Walk : 10,
+    Tile.Bus : 3,
+    Tile.Ship : 5,
+    Tile.Train : 1
+}
+
+
 # State is simply tuple (x, y)
 
 class Catalonia(object):
+
+    def money_cost_func(self, state):
+        x , y = state
+        tile = self.layout[y][x]
+        return MoneyCost[tile]
+
+
+    def time_cost_func(self, state):
+        x , y = state
+        tile = self.layout[y][x]
+        return TimeCost[tile]
+
     def __init__(self):
         self.layout = []
         self.expanded = []
         self.shape = (0, 0)
 
-        self.startState = None
-        self.goalState = None
+        self.startState = (0,0)
+        self.goalState = (9,9)
+
+        self.cost_function = lambda s: 0
 
     def get_target_state(self):
         assert self.startState is not None
@@ -71,12 +107,10 @@ class Catalonia(object):
             newx = state[0] + dx
             newy = state[1] + dy
             if 0 <= newx < self.shape[0] and 0 <= newy < self.shape[1]:
-                yield ((newx, newy),k, 1)
+                yield ((newx, newy),k, self.cost_function((newx, newy)))
 
-    def is_target_state(self, state):
-        return state == self.targetState
-
-
+    def is_goal_state(self, state):
+        return state == self.goalState
 
 
 if __name__ == "__main__":
